@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "HeavyViewController.h"
 
 @implementation AppDelegate
 
@@ -20,9 +21,29 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
+    UIDevice *device = [UIDevice currentDevice];
+    [device beginGeneratingDeviceOrientationNotifications];
+    [device setProximityMonitoringEnabled:YES];
+    
+    NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
+    
+    [nc addObserver:self
+           selector:@selector(orientationChanged:)
+               name:UIDeviceOrientationDidChangeNotification
+             object:device];
+    
+    [nc addObserver:self
+           selector:@selector(proximityChanged:)
+               name:UIDeviceProximityStateDidChangeNotification
+             object:device];
+    
+    HeavyViewController *hvc = [[[HeavyViewController alloc] init] autorelease];
+    [[self window] setRootViewController:hvc];
+    
+    //self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     // Override point for customization after application launch.
-    self.window.backgroundColor = [UIColor whiteColor];
+    //self.window.backgroundColor = [UIColor whiteColor];
+    
     [self.window makeKeyAndVisible];
     return YES;
 }
@@ -66,4 +87,14 @@
      */
 }
 
+- (void)orientationChanged:(NSNotification *)note
+{
+    NSLog(@"orientationChanged: %d", [[note object] orientation]);
+}
+
+- (void)proximityChanged:(NSNotification *)note
+{
+    NSLog(@"proximityStateChanges %@", [[note object] proximityState]);
+    [[self window] setBackgroundColor:[UIColor greenColor]];
+}
 @end
